@@ -92,6 +92,15 @@ until you ask:
 The start log says which table was taken or why none was (`hipBLASLt tuning table: ...`). Please send that line and a
 prompt-speed run with `on` and `off` from an RX 7000 or Strix Halo card.
 
+## Idle queue parking (opt-in source build, Linux)
+
+On some RDNA3 systems, a loaded but idle engine can keep the GPUs busy when the ROCr compute queues exceed the hardware slots.
+Build the Linux HIP engine with `-DSTRATA_KFDQ=ON` to try parking its idle queues without unloading the model or changing the GPU power policy.
+The feature requires the Linux KFD headers. Set `STRATA_KFDQ=0` before starting that binary for a comparison without parking.
+
+The port uses Strata-rdna3's 2-second idle interval and 2 ms wake polling while parked. A failed restore is retried even if the queue pointers stop changing.
+The polling interval is not a wake-latency bound: scheduling and driver calls add time. Measure idle power and request latency on your own hardware.
+
 ## Install with setup (source checkout, Linux)
 
 ```sh
